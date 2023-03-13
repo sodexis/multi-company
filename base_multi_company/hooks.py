@@ -22,7 +22,7 @@ def set_security_rule(env, rule_ref):
         {
             "active": True,
             "domain_force": (
-                "['|', ('no_company_ids', '=', True), ('company_ids', "
+                "['|', ('company_ids', '=', False), ('company_ids', "
                 "'in', company_ids)]"
             ),
         }
@@ -51,6 +51,7 @@ def post_init_hook(cr, rule_ref, model_name):
             INSERT INTO {}
             ({}, {})
             SELECT id, company_id FROM {} WHERE company_id IS NOT NULL
+            ON CONFLICT DO NOTHING
         """.format(
             table_name,
             column1,
@@ -68,16 +69,15 @@ def uninstall_hook(cr, rule_ref):
         rule_ref (string): XML ID of security rule to remove the
             `domain_force` from.
     """
-    with api.Environment.manage():
-        env = api.Environment(cr, SUPERUSER_ID, {})
-        # Change access rule
-        rule = env.ref(rule_ref)
-        rule.write(
-            {
-                "active": False,
-                "domain_force": (
-                    " ['|', ('company_id', '=', user.company_id.id),"
-                    " ('company_id', '=', False)]"
-                ),
-            }
-        )
+    env = api.Environment(cr, SUPERUSER_ID, {})
+    # Change access rule
+    rule = env.ref(rule_ref)
+    rule.write(
+        {
+            "active": False,
+            "domain_force": (
+                " ['|', ('company_id', '=', user.company_id.id),"
+                " ('company_id', '=', False)]"
+            ),
+        }
+    )
