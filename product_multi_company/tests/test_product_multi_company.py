@@ -60,6 +60,14 @@ class TestProductMultiCompany(ProductMultiCompanyCommon, common.TransactionCase)
                 self.user_company_2
             ).description_sale = "Test 3"
 
+    def test_product_write(self):
+        # Companies on variants may be different compared to their templates
+        self.product_company_both.write({"company_ids": [(6, 0, self.company_1.ids)]})
+        self.assertNotEqual(
+            self.product_company_both.company_ids,
+            self.product_company_both.product_tmpl_id.company_ids,
+        )
+
     def test_uninstall(self):
         from ..hooks import uninstall_hook
 
