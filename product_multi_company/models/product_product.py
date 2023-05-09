@@ -39,11 +39,18 @@ class ProductProduct(models.Model):
         if self.env.context.get("company_inverse"):
             return super(ProductProduct, self).write(values)
         if values.get("company_ids") and values["company_ids"][0][0] == 6:
+            get_param = self.env["ir.config_parameter"].sudo().get_param
             # Add companies to the template, but don't remove them.
             companies_to_add = list(
                 set(values.get("company_ids")[0][2]).difference(self.company_ids.ids)
             )
             companies_to_add.extend(self.product_tmpl_id.company_ids.ids)
+
+            # below code will sync the companies (add, delete)
+            # if the param sync_template_product_companies is set
+            if get_param("product_multi_company.sync_template_product_companies"):
+                companies_to_add = values.get("company_ids")[0][2]
+
             if companies_to_add:
                 self.product_tmpl_id.write({"company_ids": [(6, 0, companies_to_add)]})
         return super(ProductProduct, self).write(values)

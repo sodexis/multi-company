@@ -42,3 +42,16 @@ class ProductTemplate(models.Model):
         return super(
             ProductTemplate, self.with_context(from_create_variants=True)
         )._create_variant_ids()
+
+    def write(self, vals):
+        res = super().write(vals)
+        get_param = self.env["ir.config_parameter"].sudo().get_param
+        if vals.get("company_ids") and get_param(
+            "product_multi_company.sync_template_product_companies"
+        ):
+            self.product_variant_ids.with_context(company_inverse=True).write(
+                {
+                    "company_ids": vals.get("company_ids"),
+                }
+            )
+        return res
