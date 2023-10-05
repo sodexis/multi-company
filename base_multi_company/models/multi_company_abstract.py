@@ -28,7 +28,7 @@ class MultiCompanyAbstract(models.AbstractModel):
             # Give the priority of the current company of the user to avoid
             # multi company incompatibility errors.
             current_company = self.env.company.id
-            allowed_companies = self.env.context.get("allowed_company_ids")
+            allowed_companies = self.env.context.get("allowed_company_ids", [])
             if len(allowed_companies):
                 current_company = allowed_companies[0]
             company_id =  current_company
