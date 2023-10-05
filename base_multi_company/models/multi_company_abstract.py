@@ -27,7 +27,11 @@ class MultiCompanyAbstract(models.AbstractModel):
         for record in self:
             # Give the priority of the current company of the user to avoid
             # multi company incompatibility errors.
-            company_id = self.env.context.get("force_company") or self.env.company.id
+            current_company = self.env.company.id
+            allowed_companies = self.env.context.get("allowed_company_ids")
+            if len(allowed_companies):
+                current_company = allowed_companies[0]
+            company_id =  current_company
             if company_id in record.company_ids.ids:
                 record.company_id = company_id
             else:
