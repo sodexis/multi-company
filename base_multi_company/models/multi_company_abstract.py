@@ -47,7 +47,8 @@ class MultiCompanyAbstract(models.AbstractModel):
                 elif common_companies:
                     record.company_id = common_companies[0].id
                 else:  # Use the fallback as last resource
-                    record.company_id = record.company_ids[:1].id
+                    fallback_company_id = record._origin.id if isinstance(record.id, models.NewId) else record.id
+                    record.company_id = fallback_company_id
 
     def _inverse_company_id(self):
         # To allow modifying allowed companies by non-aware base_multi_company
