@@ -33,6 +33,11 @@ class MultiCompanyAbstract(models.AbstractModel):
             #   record to be compared.
             # - Otherwise, use current companies of the user, prioritizing main company.
             # - As last resource, use the first allowed company.
+
+            if not record.id:
+                record.company_id = False
+                continue
+
             company_id = self.env.context.get(
                 "_check_company_source_id"
             ) or self.env.context.get("force_company")
